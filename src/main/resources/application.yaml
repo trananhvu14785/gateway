@@ -1,0 +1,78 @@
+server:
+  port: 8080
+  shutdown: graceful
+  undertow:
+    threads:
+      io: 100
+      worker: 1000
+
+spring:
+  mail:
+    web-application-type: reactive
+  application:
+    name: gateway-service
+  security:
+    enabled: false
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://localhost:8089
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
+
+        - id: origination-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/origination/**
+          filters:
+            - StripPrefix=1
+
+        - id: customer-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/customer/**
+          filters:
+            - StripPrefix=1
+
+        - id: core-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/core/**
+          filters:
+            - StripPrefix=1
+
+        - id: account-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/account/**
+          filters:
+            - StripPrefix=1
+
+security:
+  basic:
+    enabled: false
+  cors:
+    allowedHeaders:
+      - '*'
+    allowedOrigins:
+      - '*'
+    allowedMethods:
+      - 'GET'
+      - 'POST'
+      - 'PUT'
+      - 'PATCH'
+      - 'DELETE'
+      - 'OPTIONS'
+      - 'HEAD'
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.ipc.netty: DEBUG
+    reactor.netty: DEBUG
